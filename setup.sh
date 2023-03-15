@@ -15,3 +15,4 @@ printf "\nYou can now type 'ssh pcss' to connect to pcss\n"
 
 echo "Setting up python (miniconda) on pcss"
 ssh pcss 'bash -s' < pcss_setup.sh
+mkdir 

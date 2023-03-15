@@ -7,9 +7,9 @@ export XDG_STATE_HOME=$HOME/.local/state
 export XDG_CACHE_HOME=$HOME/.cache
 
 export LESSHISTFILE=$XDG_CACHE_HOME/less/history
-export PATH=$HOME/grant_398/scratch/bin:$PATH
 export SLURM_TIME_FORMAT="%H:%M:%S"
 export TERM=xterm-color
+export PATH=$HOME/grant_398/scratch/bin:$PATH
 export PATH="/home/users/mathieum/.local/share/conda/bin:$PATH"
 
 alias ..='cd ..'
@@ -31,49 +31,7 @@ alias l='ls '
 fsrun () {
     srun -n 1 -c 1 --mem=4G -t 01:00:00 -p fast --pty /bin/bash
 }
-copytest () {
-    echo "Testing drive speed in $1"
-    dd if=/dev/urandom of=$1/test bs=8k count=10k; \rm $1/test
-}
-speedtest () {
-    copytest $HOME
-    copytest /tmp/lustre_shared/groups/grant_398
-    copytest /mnt/storage_2/project_data/grant_398
-    copytest /mnt/storage_2/scratch/grant_398
-    copytest /mnt/storage_3/archive/grant_398
-}
-q () {
-    calc_modes=0
-    for arg in "$@"; do 
-        if [ $arg == "-m" ];then
-            calc_modes=1
-            continue
-        fi
-        mx3_path=$PWD/$arg
-        zarr_path="${mx3_path/.mx3/.zarr}"
-        log_path=$zarr_path/slurm.logs
-        calc_log_path=$zarr_path/slurm_calc.logs
-        batch_name="$(basename "$(dirname $mx3_path)")"
-        job_name="${arg/.mx3/}"
-        mkdir -p $zarr_path
-        JobID=$(sbatch --job-name="$job_name" --output="$log_path" $HOME/sbatch/amumax.sh $mx3_path | cut -f 4 -d' ')
-        sbatch -d afterany:$JobID --job-name="calc_$job_name" --output=$calc_log_path $HOME/sbatch/amumax_post.sh $zarr_path $batch_name $calc_modes > /dev/null
-        echo " - Submitted job for ${job_name}.mx3"
-    done
-}
-qo () {
-    for arg in "$@"; do 
-        mx3_path=$PWD/$arg
-        zarr_path="${mx3_path/.mx3/.zarr}"
-        log_path=$zarr_path/slurm.logs
-        job_name="${arg/.mx3/}"
-        mkdir -p $zarr_path
-        sbatch --job-name="$job_name" --output="$log_path" $HOME/sbatch/amumax2.sh $mx3_path
-        echo " - Submitted job for ${job_name}.mx3"
-    done
-}
 
-# If not running interactively, don't do anything
 case $- in
     *i*) ;;
       *) return;;
